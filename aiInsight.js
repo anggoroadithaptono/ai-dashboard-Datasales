@@ -2,7 +2,39 @@
 window.AIInsight = {
     _anomalyNarasiCache: null,
     _anomalyNarasiPending: false,
+
+    // === REQUEST QUEUE: Antrian agar panggilan AI tidak bersamaan (mencegah rate limit) ===
+    _queue: [],
+    _isProcessing: false,
+
+    enqueue(fn) {
+        return new Promise((resolve, reject) => {
+            this._queue.push({ fn, resolve, reject });
+            this._processQueue();
+        });
+    },
+
+    async _processQueue() {
+        if (this._isProcessing || this._queue.length === 0) return;
+        this._isProcessing = true;
+        const { fn, resolve, reject } = this._queue.shift();
+        try {
+            const result = await fn();
+            resolve(result);
+        } catch (e) {
+            reject(e);
+        } finally {
+            this._isProcessing = false;
+            // Jeda 800ms antar request agar tidak kena rate limit
+            setTimeout(() => this._processQueue(), 800);
+        }
+    },
     async callGroqAPI(promptText) {
+        // Semua request masuk antrian
+        return this.enqueue(() => this._doFetch(promptText));
+    },
+
+    async _doFetch(promptText) {
         const response = await fetch('groq-proxy.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

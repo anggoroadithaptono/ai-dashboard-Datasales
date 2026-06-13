@@ -1,8 +1,15 @@
 <?php
 // get_sales.php
+error_reporting(0);       // Jangan tampilkan PHP warnings ke output
+ini_set('display_errors', 0);
+ob_start();               // Buffer output agar warning tidak merusak JSON
+
 header('Content-Type: application/json; charset=utf-8');
 
 require_once 'db_config.php';
+
+ob_clean(); // Bersihkan buffer sebelum output JSON
+
 
 // Select columns needed by dashboard to optimize response size
 $query = "SELECT 
