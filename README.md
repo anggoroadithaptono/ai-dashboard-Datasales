@@ -1,80 +1,115 @@
-# 📊 AI Sales Analytics Dashboard
+# 📊 Dashboard AI Sales — DAVIS B
 
-> **Dashboard Preview** · **Tech Stack** · **AI**
-
-AI Sales Analytics Dashboard adalah proyek tugas akhir **(EAS DAVIS B)** yang dirancang untuk memberikan wawasan *(insight)* bisnis komprehensif menggunakan data penjualan. Berbeda dengan dashboard konvensional, proyek ini tidak hanya menampilkan visualisasi statis, melainkan dilengkapi dengan **kecerdasan buatan (AI)** yang mampu membaca data, mendeteksi anomali, dan memberikan rekomendasi strategi bisnis secara *real-time*.
+Dashboard interaktif berbasis web untuk analisis data penjualan yang dilengkapi dengan **kecerdasan buatan (AI)** via Groq API. Dashboard ini mampu membaca data secara real-time, mendeteksi anomali otomatis, dan memberikan narasi serta rekomendasi bisnis langsung di dalam antarmuka.
 
 ---
 
 ## ✨ Fitur Utama
 
-### 1. 🤖 Integrasi AI (Business Analyst Assistant)
-Ditenagai oleh **Groq API (Llama 3.1 8B)**, dashboard ini dapat bertindak sebagai Business Analyst virtual.
+### 🏠 Home — Overview
+- KPI ringkasan: **Total Sales, Total Profit, Profit Margin, Items Sold, Total Customers, Total Orders**
+- Grafik **Monthly Sales Trend** dengan deteksi anomali visual (titik merah = anomali)
+- Grafik **Top 10 Sub-Category** by Sales
+- Panel **Anomali Otomatis** dengan 2 tab: *Data Anomali* & *Narasi AI*
+- Panel **Ask AI** — chat langsung dengan AI Business Analyst
 
-- **Natural Language Query:** Anda dapat mengajukan pertanyaan seperti *"Bagaimana cara meningkatkan profit di wilayah yang rugi?"* dan AI akan menjawab berdasarkan data riil yang ada pada dataset.
-- **Dynamic Charts:** AI dapat membaca anomali dan jika diminta, ia mampu merender grafik baru secara dinamis *(Line, Bar, atau Scatter)* tepat di dalam jendela chat.
+### 📦 Product Performance
+- Scatter plot **Discount vs Profit** untuk melihat dampak diskon
+- Bar chart **Most Profitable Products** & **Products with Loss**
+- Doughnut chart **Category Distribution**
+- AI Insights & Ask AI panel
 
-### 2. 🚨 Deteksi Anomali Otomatis
-Sistem dilengkapi dengan algoritma deteksi anomali mandiri *(dibangun dengan Vanilla JavaScript)* yang berjalan di latar belakang:
+### 👥 Customer Insights
+- Tabel **Top 10 Active Customers** by Sales & Profit
+- Pie chart **Customer Segment Distribution**
+- AI Insights & Ask AI panel
 
-- Mendeteksi produk-produk spesifik yang memicu **Kebocoran Profit Kritis**.
-- Menganalisis dampak pemberian **diskon berlebihan** yang merugikan perusahaan.
-- Menganalisis pergerakan persentase **Profit Margin** dan **Month-over-Month (MoM) Revenue**.
+### 🌏 Regional Mapping
+- **GeoChart** (Google Charts) — peta kepadatan penjualan per wilayah
+- **D3.js SVG Bar Chart** — Top 5 Provinsi by Sales
+- AI Insights & Ask AI panel
 
-### 3. 📈 Visualisasi Data Interaktif (D3.js)
-Menampilkan berbagai metrik penting (KPI) dengan desain **Dark Mode Liquid Glass**:
+### 🧾 Transaction Detail
+- Tabel transaksi lengkap dengan **live search** & pagination
+- Export data ke **CSV**
 
-| Visualisasi | Deskripsi |
-|---|---|
-| **Tren Penjualan Bulanan** | Fluktuasi pendapatan dari waktu ke waktu |
-| **Sales by Category** | Perbandingan volume penjualan antar kategori utama |
-| **Profit by Sub-Category** | Identifikasi sub-kategori paling menguntungkan / merugikan *(merah)* |
-| **Sales vs Profit** | Scatter plot yang memetakan performa ratusan kota secara spesifik |
-
-### 4. 📊 Tableau Integration
-Sebagai pelengkap, dashboard ini juga menyertakan tab khusus yang melakukan **embed langsung (iframe)** terhadap visualisasi tingkat lanjut dari **Tableau Public**.
+### 📊 Tableau Dashboard
+- Embed langsung visualisasi dari **Tableau Public**
 
 ---
 
-## 🛠️ Teknologi yang Digunakan
+## 🤖 Fitur AI
+
+Setiap halaman memiliki 3 lapisan AI:
+
+| Fitur | Deskripsi |
+|---|---|
+| **AI Narrative Story** | Narasi otomatis 2-3 kalimat berdasarkan data halaman aktif |
+| **AI Insights & Rekomendasi** | 3 poin analisis: 2 insight + 1 rekomendasi aksi konkret |
+| **AI Anomaly Narrative** | Analisis tajam anomali revenue & profit margin yang terdeteksi |
+| **AI Chart Titles** | Judul grafik dinamis yang mencerminkan fakta data aktual |
+| **Ask AI (Chat)** | Tanya langsung ke AI sebagai Business Analyst virtual |
+
+---
+
+## 🚨 Deteksi Anomali Otomatis
+
+Sistem berjalan di background menggunakan **Vanilla JavaScript** murni:
+- Deteksi **lonjakan MoM (Month-over-Month) Revenue** ≥ 100%
+- Deteksi **anomali Profit Margin** per Sub-Kategori via **Z-Score** (threshold > 1.4)
+
+---
+
+## 🛠️ Teknologi
 
 | Layer | Teknologi |
 |---|---|
-| **Frontend** | HTML5, CSS3 *(Glassmorphism Dark Theme)*, Vanilla JavaScript |
-| **Data Visualization** | D3.js (v7) untuk rendering grafik custom |
-| **AI / LLM** | Groq API — model `llama-3.1-8b-instant` |
-| **Dataset** | `Sales_BY_Category.csv` *(Custom Sales Dataset)* |
+| **Frontend** | HTML5, CSS3 (Glassmorphism Dark Theme), Vanilla JavaScript |
+| **Charting** | Chart.js, D3.js v7, Google Charts (GeoChart) |
+| **AI / LLM** | Groq API — model `qwen/qwen3-32b` via PHP Proxy |
+| **Data Source** | MySQL (XAMPP) dengan fallback CSV via PapaParse |
+| **Backend** | PHP (XAMPP/Apache) |
 
 ---
 
-## 🚀 Cara Menjalankan Secara Lokal
+## 🚀 Cara Menjalankan Lokal
 
-> ⚠️ Karena proyek ini menggunakan `d3.csv()` untuk membaca file dataset, maka **wajib** dijalankan melalui **Local Web Server** guna menghindari blokir CORS Policy dari browser.
+> ⚠️ Wajib menggunakan **XAMPP** karena project menggunakan PHP backend dan MySQL.
 
-**1.** Buka folder proyek di terminal atau command prompt.
-
-**2.** Jalankan server lokal. Jika Anda memiliki PHP:
+**1.** Clone repository ini ke folder `htdocs` XAMPP:
 ```bash
-php -S localhost:8080
+git clone https://github.com/anggoroadithaptono/ai-dashboard-Datasales.git
 ```
-> **Alternatif:** Gunakan ekstensi **Live Server** di VS Code, atau:
-> ```bash
-> python -m http.server 8080
-> ```
 
-**3.** Buka browser dan kunjungi:
+**2.** Buat file `config.secret.php` di dalam folder project (tidak ter-push ke GitHub):
+```php
+<?php
+define('GROQ_API_KEY', 'your_groq_api_key_here');
 ```
-http://localhost:8080
+
+**3.** Jalankan **Apache & MySQL** di XAMPP Control Panel.
+
+**4.** Buka browser dan akses:
 ```
+http://localhost/davis/davis/index.html
+```
+
+---
+
+## 🔑 Global Filters
+
+Dashboard mendukung filter yang berlaku untuk semua halaman secara bersamaan:
+- **Start Date / End Date** — filter rentang waktu transaksi
+- **Region** — filter per wilayah
+- **Category / Sub-Category** — filter per kategori produk
+- **Segment** — filter per segmen pelanggan
 
 ---
 
 ## 👤 Identitas Pembuat
 
-Proyek ini dikembangkan oleh:
-
 | | |
 |---|---|
-| **Nama** | Taufiq Tri Winardi |
-| **NPM** | 23082010008 |
+| **Nama** | Anggoro Adit Haptono |
+| **NPM** | 23082010006 |
 | **Mata Kuliah** | EAS DAVIS B |
