@@ -1,0 +1,17 @@
+# File konfigurasi rahasia - JANGAN di-commit!
+config.secret.php
+db_config.php
+
+# File CSV besar
+*.csv
+
+# PHP backend files (tidak diperlukan di Cloudflare Pages)
+*.php
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard AI Sales</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Google Charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <link rel="stylesheet" href="style.css?v=32">
+</head>
+
+<body>
+
+    <div id="app-container">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="glass-card">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <div class="logo-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                    <div class="brand-text">
+                        <h2>Anggoro Adit Haptono</h2>
+                        <span>23082010006</span>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-target="page-1"><i class="fa-solid fa-gauge-high"></i> Home</button>
+                <button class="nav-btn" data-target="page-2"><i class="fa-solid fa-box-open"></i> Product
+                    Performance</button>
+                <button class="nav-btn" data-target="page-3"><i class="fa-solid fa-users"></i> Customer
+                    Insights</button>
+                <button class="nav-btn" data-target="page-4"><i class="fa-solid fa-earth-americas"></i> Regional
+                    Mapping</button>
+                <button class="nav-btn" data-target="page-5"><i class="fa-solid fa-file-invoice-dollar"></i> Transaction
+                    Detail</button>
+                <button class="nav-btn" data-target="page-6"><i class="fa-solid fa-chart-line"></i> Tableau
+                    Dashboard</button>
+            </nav>
+            <div class="global-filters">
+                <h4>Global Filters</h4>
+                <div class="filter-group">
+                    <label>Start Date</label>
+                    <input type="date" id="filter-start-date" class="glass-input">
+                </div>
+                <div class="filter-group">
+                    <label>End Date</label>
+                    <input type="date" id="filter-end-date" class="glass-input">
+                </div>
+                <div class="filter-group">
+                    <label>Region</label>
+                    <select id="filter-region" class="glass-input">
+                        <option value="All">All Regions</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Category</label>
+                    <select id="filter-category" class="glass-input">
+                        <option value="All">All Categories</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>SubCategory</label>
+                    <select id="filter-subcategory" class="glass-input">
+                        <option value="All">All SubCategories</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Segment</label>
+                    <select id="filter-segment" class="glass-input">
+                        <option value="All">All Segments</option>
+                    </select>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main id="main-content">
+
+            <!-- PAGE 1: Overview -->
+            <section id="page-1" class="page-view">
+                <header class="page-header glass-card">
+                    <h1>Home <span class="scr-badge scr-situation">SITUATION</span></h1>
+                </header>
+                <div id="story-page-1" class="page-story-narrative glass-card hidden">
+                    <p class="story-text"><i class="fa-solid fa-spinner fa-spin"></i> Menyusun cerita performa bisnis...
+                    </p>
+                </div>
+
+                <div class="page-layout-grid">
+                    <!-- Kiri: KPI & Main Chart (2.5fr) -->
+                    <div class="main-column">
+                        <div class="kpi-banner">
+                            <div class="glass-card kpi-card">
+                                <div class="kpi-info">
+                                    <span>Total Sales</span>
+                                    <h2 id="kpi-sales">Rp 0</h2>
+                                </div>
+                                <div class="kpi-icon-wrapper kpi-sales-icon">
+                                    <i class="fa-solid fa-wallet"></i>
+                                </div>
+                            </div>
+                            <div class="glass-card kpi-card">
+                                <div class="kpi-info">
+                                    <span>Total Profit</span>
+                                    <h2 id="kpi-profit">Rp 0</h2>
+                                </div>
+                                <div class="kpi-icon-wrapper kpi-profit-icon">
+                                    <i class="fa-solid fa-coins"></i>
+                                </div>
+                            </div>
+                            <div class="glass-card kpi-card">
+                                <div class="kpi-info">
+                                    <span>Profit Margin</span>
+                                    <h2 id="kpi-margin">0%</h2>
+                                </div>
+                                <div class="kpi-icon-wrapper kpi-margin-icon">
+                                    <i class="fa-solid fa-percent"></i>
+                                </div>
+                            </div>
+                            <div class="glass-card kpi-card">
+                                <div class="kpi-info">
+                                    <span>Items Sold</span>
+                                    <h2 id="kpi-qty">0</h2>
+                                </div>
+                                <div class="kpi-icon-wrapper kpi-qty-icon">
+                                    <i class="fa-solid fa-cubes"></i>
+                                </div>
+                            </div>
+                            <div class="glass-card kpi-card">
+                                <div class="kpi-info">
+                                    <span>Total Customers</span>
+                                    <h2 id="kpi-customers">0</h2>
+                                </div>
+                                <div class="kpi-icon-wrapper kpi-customers-icon">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                            </div>
+                            <div class="glass-card kpi-card">
+                                <div class="kpi-info">
+                                    <span>Total Orders</span>
+                                    <h2 id="kpi-orders">0</h2>
+                                </div>
+                                <div class="kpi-icon-wrapper kpi-orders-icon">
+                                    <i class="fa-solid fa-receipt"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card chart-box relative mt-24">
+                            <h3 id="title-monthly-trend">Monthly Sales Trend</h3>
+                            <div class="chart-container">
+                                <canvas id="chart-monthly-trend"></canvas>
+                            </div>
+                            <!-- Anomaly Tabbed Card -->
+                            <div id="anomaly-card" class="anomaly-tabbed-card hidden">
+                                <div class="a-tab-bar">
+                                    <div class="a-tab-bar-left">
+                                        <i class="fa-solid fa-triangle-exclamation anomaly-icon-sm"></i> <span class="scr-badge scr-complication" style="font-size: 0.7rem; padding: 2px 6px;">COMPLICATION</span>
+                                        <span id="anomaly-count-badge" class="anomaly-badge">0 anomali</span>
+                                    </div>
+                                    <div class="a-tab-buttons">
+                                        <button class="a-tab active" data-atab="atab-data">Data Anomali</button>
+                                        <button class="a-tab" data-atab="atab-narasi">Narasi AI</button>
+                                    </div>
+                                </div>
+
+                                <div id="atab-data" class="a-tab-content">
+                                    <div id="anomaly-list" class="anomaly-list-container"></div>
+                                </div>
+
+                                <div id="atab-narasi" class="a-tab-content hidden">
+                                    <div id="anomaly-narasi-content" class="anomaly-narasi-box">
+                                        <span class="a-loading"><i class="fa-solid fa-spinner fa-spin"></i> Memuat
+                                            narasi AI...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kanan: Insights AI Column (1fr) -->
+                    <div class="insight-wrapper">
+                        <div class="insight-column glass-card flex-col">
+                            <h3><i class="fa-solid fa-robot"></i> <span class="scr-badge scr-resolution">RESOLUTION</span> Insights & Recommendations AI</h3>
+                            <div id="insight-page-1" class="insight-box flex-grow">
+                                Waiting for data analysis...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bawah: Chat Panel & Secondary Chart -->
+                <div class="row-bottom-widgets">
+                    <div class="glass-card">
+                        <h3 id="title-subcategory">Top 10 SubCategory</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-subcategory"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="glass-card chat-panel flex-col">
+                        <h3><i class="fa-regular fa-comment-dots"></i> <span class="scr-badge scr-resolution">RESOLUTION</span> Ask AI / Prompt Center</h3>
+                        <div id="chat-log-page-1" class="chat-log flex-grow">
+                            <div class="chat-message ai-message">Hello! I am your AI Business Assistant. How can I help
+                                you analyze the overview data today?</div>
+                        </div>
+                        <div class="chat-input-row">
+                            <input type="text" id="chat-input-page-1" class="glass-input chat-input"
+                                placeholder="Ask something...">
+                            <button class="btn-icon" onclick="window.AIInsight.handleInPageChat('page-1')"><i
+                                    class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 2: Product Performance -->
+            <section id="page-2" class="page-view hidden">
+                <header class="page-header glass-card">
+                    <h1>Product Performance <span class="scr-badge scr-situation">SITUATION</span></h1>
+                </header>
+                <div id="story-page-2" class="page-story-narrative glass-card hidden">
+                    <p class="story-text"><i class="fa-solid fa-spinner fa-spin"></i> Menganalisis cerita produk...</p>
+                </div>
+
+                <div class="page-layout-grid">
+                    <div class="main-column">
+                        <div class="glass-card chart-box mb-24">
+                            <h3 id="title-scatter-discount">Discount vs Profit Impact</h3>
+                            <div class="chart-container" style="height: 220px;">
+                                <canvas id="chart-scatter-discount"></canvas>
+                            </div>
+                        </div>
+                        <div class="grid-2 gap-24">
+                            <div class="glass-card">
+                                <h3 id="title-top-profit">Most Profitable Products</h3>
+                                <div class="chart-container" style="height: 200px;">
+                                    <canvas id="chart-top-profit"></canvas>
+                                </div>
+                            </div>
+                             <div class="glass-card chart-box">
+                                <h3><span class="scr-badge scr-complication" style="font-size: 0.7rem; padding: 2px 6px;">COMPLICATION</span> Products with Loss</h3>
+                                <div class="chart-container" style="height: 200px;">
+                                    <canvas id="chart-bottom-profit"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insight-wrapper">
+                        <div class="insight-column glass-card flex-col">
+                            <h3><i class="fa-solid fa-robot"></i> <span class="scr-badge scr-resolution">RESOLUTION</span> Insights & Recommendations AI</h3>
+                            <div id="insight-page-2" class="insight-box flex-grow">
+                                Waiting for data analysis...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row-bottom-widgets">
+                    <div class="glass-card">
+                        <h3 id="title-category">Category Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-category"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="glass-card chat-panel flex-col">
+                        <h3><i class="fa-regular fa-comment-dots"></i> <span class="scr-badge scr-resolution">RESOLUTION</span> Ask AI / Prompt Center</h3>
+                        <div id="chat-log-page-2" class="chat-log flex-grow">
+                            <div class="chat-message ai-message">Ask me anything about product performance and
+                                profitability.</div>
+                        </div>
+                        <div class="chat-input-row">
+                            <input type="text" id="chat-input-page-2" class="glass-input chat-input"
+                                placeholder="Ask something...">
+                            <button class="btn-icon" onclick="window.AIInsight.handleInPageChat('page-2')"><i
+                                    class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 3: Customer Insights -->
+            <section id="page-3" class="page-view hidden">
+                <header class="page-header glass-card">
+                    <h1>Customer Insights <span class="scr-badge scr-situation">SITUATION</span></h1>
+                </header>
+                <div id="story-page-3" class="page-story-narrative glass-card hidden">
+                    <p class="story-text"><i class="fa-solid fa-spinner fa-spin"></i> Menyusun narasi profil
+                        pelanggan...</p>
+                </div>
+
+                <div class="page-layout-grid">
+                    <div class="main-column">
+                        <div class="glass-card chart-box">
+                            <h3 id="title-customers">Top 10 Active Customers</h3>
+                            <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                                <table class="glass-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Customer Name</th>
+                                            <th>Total Sales</th>
+                                            <th>Total Profit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="top-customer-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insight-wrapper">
+                        <div class="insight-column glass-card flex-col">
+                            <h3><i class="fa-solid fa-robot"></i> <span class="scr-badge scr-resolution">RESOLUTION</span> Insights & Recommendations AI</h3>
+                            <div id="insight-page-3" class="insight-box flex-grow">
+                                Waiting for data analysis...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row-bottom-widgets">
+                    <div class="glass-card">
+                        <h3 id="title-segment">Customer Segment Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-segment-pie"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="glass-card chat-panel flex-col">
+                        <h3><i class="fa-regular fa-comment-dots"></i> <span class="scr-badge scr-resolution">RESOLUTION</span> Ask AI / Prompt Center</h3>
+                        <div id="chat-log-page-3" class="chat-log flex-grow">
+                            <div class="chat-message ai-message">What would you like to know about our customer base?
+                            </div>
+                        </div>
+                        <div class="chat-input-row">
+                            <input type="text" id="chat-input-page-3" class="glass-input chat-input"
+                                placeholder="Ask something...">
+                            <button class="btn-icon" onclick="window.AIInsight.handleInPageChat('page-3')"><i
+                                    class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 4: Regional Mapping -->
+            <section id="page-4" class="page-view hidden">
+                <header class="page-header glass-card">
+                    <h1>Regional Mapping <span class="scr-badge scr-situation">SITUATION</span></h1>
+                </header>
+                <div id="story-page-4" class="page-story-narrative glass-card hidden">
+                    <p class="story-text"><i class="fa-solid fa-spinner fa-spin"></i> Mengumpulkan cerita dari berbagai
+                        wilayah...</p>
+                </div>
+
+                <div class="page-layout-grid">
+                    <div class="main-column">
+                        <div class="glass-card chart-box mb-24">
+                            <h3>Sales Density by Region</h3>
+                            <div class="chart-container" style="position: relative; height: 300px;">
+                                <div id="chart-region-map" style="width: 100%; height: 100%;"></div>
+                            </div>
+                        </div>
+                        <div class="glass-card chart-box">
+                            <h3>Top 5 Provinces (D3.js SVG Chart)</h3>
+                            <div class="chart-container" style="height: 200px;">
+                                <div id="d3-chart-province" style="width: 100%; height: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insight-wrapper">
+                        <div class="insight-column glass-card flex-col">
+                            <h3><i class="fa-solid fa-robot"></i> <span class="scr-badge scr-resolution">RESOLUTION</span> Insights & Recommendations AI</h3>
+                            <div id="insight-page-4" class="insight-box flex-grow">
+                                Waiting for data analysis...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row-bottom-widgets">
+                    <div class="glass-card chat-panel flex-col" style="grid-column: 1 / -1; height: auto;">
+                        <h3><i class="fa-regular fa-comment-dots"></i> <span class="scr-badge scr-resolution">RESOLUTION</span> Ask AI / Prompt Center</h3>
+                        <div id="chat-log-page-4" class="chat-log flex-grow" style="height: 150px;">
+                            <div class="chat-message ai-message">Ask me about regional sales performance.</div>
+                        </div>
+                        <div class="chat-input-row">
+                            <input type="text" id="chat-input-page-4" class="glass-input chat-input"
+                                placeholder="Ask something...">
+                            <button class="btn-icon" onclick="window.AIInsight.handleInPageChat('page-4')"><i
+                                    class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 5: Transaction Detail -->
+            <section id="page-5" class="page-view hidden">
+                <header class="page-header glass-card flex-between">
+                    <h1>Transaction Detail</h1>
+                    <div class="action-buttons" style="display: flex; gap: 12px;">
+                        <input type="text" id="live-search" class="glass-input"
+                            placeholder="Search Customer/Product...">
+                        <button id="btn-export" class="btn-primary"><i class="fa-solid fa-download"></i> Export
+                            CSV</button>
+                    </div>
+                </header>
+
+
+                <div class="glass-card mt-24 flex-grow flex-col" style="overflow: hidden;">
+                    <div class="table-container flex-grow" style="overflow-y: auto;">
+                        <table class="glass-table full-width">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Customer Name</th>
+                                    <th>Product Name</th>
+                                    <th>Sales</th>
+                                    <th>Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transaction-table"></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination flex-between mt-16">
+                        <button id="btn-prev" class="btn-secondary"><i class="fa-solid fa-chevron-left"></i>
+                            Prev</button>
+                        <span id="page-info">Page 1</span>
+                        <button id="btn-next" class="btn-secondary">Next <i
+                                class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE 6: Tableau Dashboard -->
+            <section id="page-6" class="page-view hidden">
+                <header class="page-header glass-card flex-between">
+                    <h1>Tableau Interactive Dashboard</h1>
+                    <a href="https://public.tableau.com/views/DAVISSalesAIDashboard/Dashboard1?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link" 
+                       target="_blank" 
+                       class="btn-primary" 
+                       style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; padding: 8px 16px;">
+                        <i class="fa-solid fa-up-right-from-square"></i> Buka di Tableau Public
+                    </a>
+                </header>
+
+                <div class="glass-card mt-24 flex-grow flex-col" style="padding: 0; overflow: hidden; min-height: 700px; height: calc(100vh - 170px); border-radius: 16px;">
+                    <iframe src="https://public.tableau.com/views/DAVISSalesAIDashboard/Dashboard1?:showVizHome=no&:embed=true" 
+                            width="100%" 
+                            height="100%" 
+                            style="border: none; border-radius: 12px; background: rgba(0, 0, 0, 0.15);">
+                    </iframe>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js?v=32"></script>
+    <script src="storyEngine.js?v=32"></script>
+    <script src="anomalyDetector.js?v=32"></script>
+    <script src="aiInsight.js?v=32"></script>
+    <script src="app.js?v=32"></script>
+</body>
+
+</html>
