@@ -4,6 +4,7 @@ db_config.php
 
 # File CSV besar
 *.csv
+!Sales_BY_Category_202606040914-1.csv
 
 # PHP backend files (tidak diperlukan di Cloudflare Pages)
 *.php

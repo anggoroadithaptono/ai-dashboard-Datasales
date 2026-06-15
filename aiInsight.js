@@ -2,40 +2,12 @@
 window.AIInsight = {
     _anomalyNarasiCache: null,
     _anomalyNarasiPending: false,
-
-    // === REQUEST QUEUE: Antrian agar panggilan AI tidak bersamaan (mencegah rate limit) ===
-    _queue: [],
-    _isProcessing: false,
-
-    enqueue(fn) {
-        return new Promise((resolve, reject) => {
-            this._queue.push({ fn, resolve, reject });
-            this._processQueue();
-        });
-    },
-
-    async _processQueue() {
-        if (this._isProcessing || this._queue.length === 0) return;
-        this._isProcessing = true;
-        const { fn, resolve, reject } = this._queue.shift();
-        try {
-            const result = await fn();
-            resolve(result);
-        } catch (e) {
-            reject(e);
-        } finally {
-            this._isProcessing = false;
-            // Jeda 800ms antar request agar tidak kena rate limit
-            setTimeout(() => this._processQueue(), 800);
-        }
-    },
     async callGroqAPI(promptText) {
-        // Semua request masuk antrian
-        return this.enqueue(() => this._doFetch(promptText));
-    },
+        // Gunakan groq-proxy.php jika berjalan lokal di XAMPP, gunakan api/groq jika di Cloudflare
+        const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const apiUrl = isLocalHost ? 'groq-proxy.php' : 'api/groq';
 
-    async _doFetch(promptText) {
-        const response = await fetch('groq-proxy.php', {
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: promptText })
@@ -73,7 +45,7 @@ window.AIInsight = {
             const topSubCat = Object.entries(subCatMap).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]).join(', ');
             return {
                 topic: 'ringkasan performa bisnis keseluruhan (Overview)',
-                data: `Total Penjualan: Rp ${(totalSales/1000000).toFixed(1)}Jt, Total Profit: Rp ${(totalProfit/1000000).toFixed(1)}Jt, Profit Margin: ${margin}%, Bulan Terbaik: ${bestMonth[0]} (Rp ${(bestMonth[1]/1000000).toFixed(1)}Jt), Sub-Kategori Terlaris: ${topSubCat}.`
+                data: `Total Penjualan: Rp ${(totalSales / 1000000).toFixed(1)}Jt, Total Profit: Rp ${(totalProfit / 1000000).toFixed(1)}Jt, Profit Margin: ${margin}%, Bulan Terbaik: ${bestMonth[0]} (Rp ${(bestMonth[1] / 1000000).toFixed(1)}Jt), Sub-Kategori Terlaris: ${topSubCat}.`
             };
 
         } else if (pageId === 'page-2') {
@@ -86,13 +58,13 @@ window.AIInsight = {
                 prodSalesMap[d.ProductName] = (prodSalesMap[d.ProductName] || 0) + d.Sales;
             });
             const sortedByProfit = Object.entries(prodProfitMap).sort((a, b) => b[1] - a[1]);
-            const top3Profit = sortedByProfit.slice(0, 3).map(([n, v]) => `${n.substring(0,20)} (Rp ${(v/1000000).toFixed(1)}Jt)`).join('; ');
-            const bottom3Profit = sortedByProfit.slice(-3).reverse().map(([n, v]) => `${n.substring(0,20)} (Rp ${(v/1000).toFixed(0)}rb)`).join('; ');
+            const top3Profit = sortedByProfit.slice(0, 3).map(([n, v]) => `${n.substring(0, 20)} (Rp ${(v / 1000000).toFixed(1)}Jt)`).join('; ');
+            const bottom3Profit = sortedByProfit.slice(-3).reverse().map(([n, v]) => `${n.substring(0, 20)} (Rp ${(v / 1000).toFixed(0)}rb)`).join('; ');
             const catMap = {};
             dataArray.forEach(d => {
                 if (d.Category) catMap[d.Category] = (catMap[d.Category] || 0) + d.Sales;
             });
-            const topCat = Object.entries(catMap).sort((a, b) => b[1] - a[1]).map(([n, v]) => `${n}: Rp ${(v/1000000).toFixed(1)}Jt`).join('; ');
+            const topCat = Object.entries(catMap).sort((a, b) => b[1] - a[1]).map(([n, v]) => `${n}: Rp ${(v / 1000000).toFixed(1)}Jt`).join('; ');
             const avgDiscount = dataArray.length > 0 ? (dataArray.reduce((s, d) => s + d.Discount, 0) / dataArray.length * 100).toFixed(1) : 0;
             return {
                 topic: 'performa produk (Product Performance) - analisis profitabilitas produk, dampak diskon, dan distribusi kategori',
@@ -110,17 +82,17 @@ window.AIInsight = {
                 custMap[d.CustomerName].txn += 1;
             });
             const topCust = Object.entries(custMap).sort((a, b) => b[1].sales - a[1].sales).slice(0, 3)
-                .map(([n, v]) => `${n} (Sales: Rp ${(v.sales/1000000).toFixed(1)}Jt, ${v.txn} transaksi)`).join('; ');
+                .map(([n, v]) => `${n} (Sales: Rp ${(v.sales / 1000000).toFixed(1)}Jt, ${v.txn} transaksi)`).join('; ');
             const segMap = {};
             dataArray.forEach(d => {
                 if (d.Segment) segMap[d.Segment] = (segMap[d.Segment] || 0) + d.Sales;
             });
             const segBreakdown = Object.entries(segMap).sort((a, b) => b[1] - a[1])
-                .map(([n, v]) => `${n}: Rp ${(v/1000000).toFixed(1)}Jt`).join('; ');
+                .map(([n, v]) => `${n}: Rp ${(v / 1000000).toFixed(1)}Jt`).join('; ');
             const totalCust = Object.keys(custMap).length;
             return {
                 topic: 'Customer Insights - analisis pelanggan terbaik, segmentasi pelanggan, dan loyalitas',
-                data: `Total Pelanggan Unik: ${totalCust}. 3 Pelanggan Teratas (by Sales): ${topCust}. Distribusi Segmen: ${segBreakdown}. Total Penjualan: Rp ${(totalSales/1000000).toFixed(1)}Jt.`
+                data: `Total Pelanggan Unik: ${totalCust}. 3 Pelanggan Teratas (by Sales): ${topCust}. Distribusi Segmen: ${segBreakdown}. Total Penjualan: Rp ${(totalSales / 1000000).toFixed(1)}Jt.`
             };
 
         } else if (pageId === 'page-4') {
@@ -134,18 +106,18 @@ window.AIInsight = {
                 regMap[reg] = (regMap[reg] || 0) + d.Sales;
             });
             const top5Prov = Object.entries(provMap).sort((a, b) => b[1] - a[1]).slice(0, 5)
-                .map(([n, v]) => `${n}: Rp ${(v/1000000).toFixed(1)}Jt`).join('; ');
+                .map(([n, v]) => `${n}: Rp ${(v / 1000000).toFixed(1)}Jt`).join('; ');
             const topReg = Object.entries(regMap).sort((a, b) => b[1] - a[1])
-                .map(([n, v]) => `${n}: Rp ${(v/1000000).toFixed(1)}Jt`).join('; ');
+                .map(([n, v]) => `${n}: Rp ${(v / 1000000).toFixed(1)}Jt`).join('; ');
             return {
                 topic: 'Regional Mapping - analisis penjualan per wilayah/provinsi, kekuatan geografis, dan potensi ekspansi regional',
-                data: `Top 5 Provinsi: ${top5Prov}. Distribusi Regional: ${topReg}. Total Penjualan Nasional: Rp ${(totalSales/1000000).toFixed(1)}Jt, Profit Margin: ${margin}%.`
+                data: `Top 5 Provinsi: ${top5Prov}. Distribusi Regional: ${topReg}. Total Penjualan Nasional: Rp ${(totalSales / 1000000).toFixed(1)}Jt, Profit Margin: ${margin}%.`
             };
         }
 
         return {
             topic: 'performa bisnis',
-            data: `Total Penjualan: Rp ${(totalSales/1000000).toFixed(1)}Jt, Profit: Rp ${(totalProfit/1000000).toFixed(1)}Jt, Margin: ${margin}%.`
+            data: `Total Penjualan: Rp ${(totalSales / 1000000).toFixed(1)}Jt, Profit: Rp ${(totalProfit / 1000000).toFixed(1)}Jt, Margin: ${margin}%.`
         };
     },
 
@@ -181,13 +153,13 @@ DILARANG menulis kalimat pembuka/penutup. DILARANG memakai markdown. OUTPUT HANY
             let result = await this.callGroqAPI(promptContext);
             result = result.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
             result = result.replace(/```json/gi, '').replace(/```/g, '').trim();
-            
+
             const match = result.match(/\[\s*\{[\s\S]*\}\s*\]/);
             if (match) result = match[0];
-            
+
             // Bersihkan karakter kontrol yang bisa merusak JSON.parse
             result = result.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
-            
+
             let parsedData;
             try {
                 parsedData = JSON.parse(result);
@@ -197,7 +169,7 @@ DILARANG menulis kalimat pembuka/penutup. DILARANG memakai markdown. OUTPUT HANY
                 parsedData = JSON.parse(fixed);
             }
 
-            
+
             const boxesHtml = parsedData.map(item => {
                 const isRec = item.type === 'rekomendasi';
                 const accentColor = isRec ? '#10b981' : '#fbbf24';
@@ -213,11 +185,11 @@ DILARANG menulis kalimat pembuka/penutup. DILARANG memakai markdown. OUTPUT HANY
                     </p>
                 </div>`;
             }).join('');
-            
+
             insightBox.innerHTML = boxesHtml;
         } catch (error) {
             console.error('Groq API Error:', error);
-            if(window.StoryEngine) {
+            if (window.StoryEngine) {
                 const localStory = window.StoryEngine.generateStory(dataArray, pageId);
                 const boxesHtml = localStory.map((item) => {
                     const isRec = item.type === 'rekomendasi';
@@ -267,7 +239,7 @@ PERINGATAN KERAS: JANGAN TULIS PROSES BERPIKIR. Jangan tulis kata pengantar sepe
             result = result.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
             // Hapus kata pengantar jika masih ada
             result = result.replace(/^(Tentu|Baiklah|Berikut|Okay|Sure|Certainly)[^.!?]*[.!?]\s*/i, '').trim();
-            
+
             storyBox.innerHTML = `<p class="story-text">${result.replace(/\n/g, '<br>')}</p>`;
         } catch (error) {
             console.error('Story API Error:', error);
@@ -285,7 +257,7 @@ PERINGATAN KERAS: JANGAN TULIS PROSES BERPIKIR. Jangan tulis kata pengantar sepe
         const inputEl = document.getElementById(`chat-input-${pageId}`);
         const logEl = document.getElementById(`chat-log-${pageId}`);
         const text = inputEl.value.trim();
-        if(!text) return;
+        if (!text) return;
 
         inputEl.value = '';
         logEl.innerHTML += `<div class="chat-message user-message">${text}</div>`;
@@ -340,10 +312,10 @@ Format respon wajib:
 3. **Rekomendasi**: (Langkah perbaikan langsung)`;
 
             let result = await this.callGroqAPI(promptContext);
-            
+
             // Hapus blok <think>...</think> yang sering dihasilkan model reasoning
             result = result.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-            
+
             // Pertahanan ekstra: Jika AI masih menuliskan proses berpikir (rambling) sebelum poin "1.", potong teksnya
             const pointOneIndex = result.indexOf('1.');
             if (pointOneIndex > 0) {
@@ -352,7 +324,7 @@ Format respon wajib:
 
             // Format teks dengan markdown bold sederhana
             result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-            
+
             const html = `<p class="a-narasi-text">${result.replace(/\n/g, '<br>')}</p>`;
             this._anomalyNarasiCache = html;
             narasiBox.innerHTML = html;
@@ -367,7 +339,7 @@ Format respon wajib:
 
     async generateNarrativeTitles(pageId, dataArray) {
         const ctx = this.getPageContext(pageId, dataArray);
-        
+
         const chartIds = [];
         if (pageId === 'page-1') {
             chartIds.push('monthly-trend', 'subcategory');
@@ -455,10 +427,10 @@ Output harus berupa raw JSON object tanpa pembuka/penutup/markdown. Format:
             let result = await this.callGroqAPI(promptContext);
             result = result.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
             result = result.replace(/```json/gi, '').replace(/```/g, '').trim();
-            
+
             const match = result.match(/\{[\s\S]*\}/);
             if (match) result = match[0];
-            
+
             const parsedData = JSON.parse(result);
             chartIds.forEach(id => {
                 const el = document.getElementById(`title-${id}`);
@@ -482,7 +454,7 @@ Output harus berupa raw JSON object tanpa pembuka/penutup/markdown. Format:
 document.addEventListener('DOMContentLoaded', () => {
     ['page-1', 'page-2', 'page-3', 'page-4'].forEach(pageId => {
         const inputEl = document.getElementById(`chat-input-${pageId}`);
-        if(inputEl) {
+        if (inputEl) {
             inputEl.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     window.AIInsight.handleInPageChat(pageId);
