@@ -143,6 +143,18 @@ function processRawData(data) {
     renderAll();
 }
 
+function showLoadError(message) {
+    const storyBox = document.getElementById('story-page-1');
+    if (storyBox) {
+        storyBox.classList.remove('hidden');
+        storyBox.innerHTML = `<p class="story-text" style="color: #ef4444;"><i class="fa-solid fa-circle-exclamation"></i> ${message}</p>`;
+    }
+    const insightBox = document.getElementById('insight-page-1');
+    if (insightBox) {
+        insightBox.innerHTML = `<div style="color: #ef4444; padding: 12px; border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 8px;">Gagal memuat insight karena data kosong.</div>`;
+    }
+}
+
 function loadCSVData() {
     console.log("Memuat data dari CSV lokal...");
     Papa.parse("Sales_BY_Category_202606040914-1.csv", {
@@ -151,6 +163,12 @@ function loadCSVData() {
         dynamicTyping: true,
         skipEmptyLines: true,
         complete: function (results) {
+            if (!results.data || results.data.length === 0 || (!results.data[0]['Category'] && !results.data[0]['SalesOrderID'])) {
+                console.error("Format data CSV tidak valid atau file tidak ditemukan.");
+                showLoadError("Gagal memuat data: File CSV tidak ditemukan atau formatnya salah. Pastikan file 'Sales_BY_Category_202606040914-1.csv' sudah di-upload ke server.");
+                return;
+            }
+
             rawData = results.data.map(row => {
                 let dDate = row['OrderDate'] || row['Order Date'];
                 return {
@@ -171,6 +189,10 @@ function loadCSVData() {
             populateFilters();
             filteredData = [...rawData];
             renderAll();
+        },
+        error: function (error) {
+            console.error("Gagal membaca file CSV:", error);
+            showLoadError("Gagal memuat data dari file CSV lokal. Detail: " + (error.message || error));
         }
     });
 }
@@ -270,6 +292,9 @@ function applyFilters() {
     // Reset cache narasi anomali karena data berubah
     if (window.AIInsight) {
         window.AIInsight._anomalyNarasiCache = null;
+        window.AIInsight._pageInsightCache = {};
+        window.AIInsight._pageStoryCache = {};
+        window.AIInsight._queue = []; // batalkan antrian lama
     }
 
     renderAll();
