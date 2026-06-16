@@ -99,7 +99,6 @@ function loadDashboardData() {
     const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
     if (isLocalHost) {
-        console.log("Mencoba memuat data dari MySQL...");
         fetch("get_sales.php")
             .then(response => {
                 if (!response.ok) {
@@ -114,7 +113,6 @@ function loadDashboardData() {
                 if (!Array.isArray(data) || data.length === 0) {
                     throw new Error("Data MySQL kosong atau tidak valid.");
                 }
-                console.log("Berhasil memuat data dari MySQL (" + data.length + " baris).");
                 processRawData(data);
             })
             .catch(error => {
@@ -122,7 +120,6 @@ function loadDashboardData() {
                 loadCSVData();
             });
     } else {
-        console.log("Berjalan di Cloudflare Pages. Memuat data dari CSV lokal...");
         loadCSVData();
     }
 }
@@ -163,7 +160,6 @@ function showLoadError(message) {
 }
 
 function loadCSVData() {
-    console.log("Memuat data dari CSV lokal...");
     Papa.parse("Sales_BY_Category_202606040914-1.csv", {
         download: true,
         header: true,
