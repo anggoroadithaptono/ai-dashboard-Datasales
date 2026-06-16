@@ -96,28 +96,35 @@ function setupAnomalyTabs() {
 }
 
 function loadDashboardData() {
-    console.log("Mencoba memuat data dari MySQL...");
-    fetch("get_sales.php")
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Respon server MySQL tidak sukses: " + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            if (!Array.isArray(data) || data.length === 0) {
-                throw new Error("Data MySQL kosong atau tidak valid.");
-            }
-            console.log("Berhasil memuat data dari MySQL (" + data.length + " baris).");
-            processRawData(data);
-        })
-        .catch(error => {
-            console.warn("Gagal memuat dari MySQL, beralih ke file CSV lokal. Detail:", error.message);
-            loadCSVData();
-        });
+    const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+    if (isLocalHost) {
+        console.log("Mencoba memuat data dari MySQL...");
+        fetch("get_sales.php")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Respon server MySQL tidak sukses: " + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                if (!Array.isArray(data) || data.length === 0) {
+                    throw new Error("Data MySQL kosong atau tidak valid.");
+                }
+                console.log("Berhasil memuat data dari MySQL (" + data.length + " baris).");
+                processRawData(data);
+            })
+            .catch(error => {
+                console.warn("Gagal memuat dari MySQL, beralih ke file CSV lokal. Detail:", error.message);
+                loadCSVData();
+            });
+    } else {
+        console.log("Berjalan di Cloudflare Pages. Memuat data dari CSV lokal...");
+        loadCSVData();
+    }
 }
 
 function processRawData(data) {
